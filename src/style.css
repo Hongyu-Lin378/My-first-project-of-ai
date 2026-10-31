@@ -293,4 +293,17 @@ code {
     right: 0;
     border-right-color: var(--border);
   }
+
+}
+  :root {
+  --van-toast-background: rgba(0, 0, 0, 0.75) !important;
+  --van-toast-text-color: #ffffff !important;
+}
+body .van-popup.van-toast {
+  background-color: #323233 !important;
+  color: #fff !important;
+}
+
+body .van-popup.van-toast .van-toast__text {
+  color: #fff !important;
 }

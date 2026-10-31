@@ -31,11 +31,11 @@ label="目的地"
   <div class="card">
     <div class="section-title">快捷入口</div>
     <div class="quick-grid">
-      <div class="quick-item">
+      <div @click="gopage('/chat')" class="quick-item">
         <van-icon name="chat-o" size="28" color="#1989fa" />
         <span class="quick-text">AI对话</span>
       </div>
-      <div class="quick-item">
+      <div @click="gopage('/profile')" class="quick-item">
         <van-icon name="orders-o" size="28" color="#07c160" />
         <span class="quick-text">我的行程</span>
       </div>
@@ -52,44 +52,14 @@ label="目的地"
 
   <div class="card">
     <div class="section-title">热门目的地</div>
-    <div class="city-grid">
-      <div class="city-item">
-        <div class="city-img" style="background: linear-gradient(135deg,#83a4d4,#b6fbff);">
-          <van-icon name="location-o" size="32" color="#fff" />
-        </div>
-        <span class="city-name">北京</span>
-      </div>
-      <div class="city-item">
-        <div class="city-img" style="background: linear-gradient(135deg,#f7971e,#ffd200);">
-          <van-icon name="location-o" size="32" color="#fff" />
-        </div>
-        <span class="city-name">上海</span>
-      </div>
-      <div class="city-item">
-        <div class="city-img" style="background: linear-gradient(135deg,#11998e,#38ef7d);">
-          <van-icon name="location-o" size="32" color="#fff" />
-        </div>
-        <span class="city-name">成都</span>
-      </div>
-      <div class="city-item">
-        <div class="city-img" style="background: linear-gradient(135deg,#f953c6,#b91d73);">
-          <van-icon name="location-o" size="32" color="#fff" />
-        </div>
-        <span class="city-name">杭州</span>
-      </div>
-      <div class="city-item">
-        <div class="city-img" style="background: linear-gradient(135deg,#4facfe,#00f2fe);">
-          <van-icon name="location-o" size="32" color="#fff" />
-        </div>
-        <span class="city-name">西安</span>
-      </div>
-      <div class="city-item">
-        <div class="city-img" style="background: linear-gradient(135deg,#fa709a,#fee140);">
-          <van-icon name="location-o" size="32" color="#fff" />
-        </div>
-        <span class="city-name">三亚</span>
-      </div>
-    </div>
+  
+  <van-grid :gutter="12" :column-num="4">
+  <van-grid-item @click="Selectcity(value)" v-for="value in hotcity" :key="value">
+  <div class="city-tag" :class="{'active': data.city === value}">
+    {{value}}
+  </div> 
+</van-grid-item>
+</van-grid>
   </div>
   </div></div>
 
@@ -100,7 +70,7 @@ label="目的地"
 </van-tabbar>
 
 <van-popup 
-round="bottom"
+round
 v-model:show="showcity" 
 position="bottom">
 <van-picker
@@ -116,10 +86,23 @@ position="bottom">
 
 <script setup>
 import {ref,reactive}from 'vue'
+import {useRouter } from 'vue-router'
+import { showToast } from 'vant'
+const router = useRouter()
+
+
+const Selectcity = (city) => {
+  data.city = city
+}
+
+const gopage = (path) => {
+  router.push(path)
+}
+
 const active = ref(0)
 const showcity=ref(false)
 const data = reactive({
-  "city" : "",
+  "city" : null,
   "budget"  : null,
   "days" : null
 })
@@ -144,7 +127,29 @@ const onCancel = () => {
 
 const handleSubmit = () => {
   console.log(data)
+  if(!data.city) {
+    showToast('请选择目的地')
+    return
+  }
+  if(!data.budget||data.budget<100) {
+    showToast('预算不能低于100元')
+    return
+  }
+  if(!data.days||data.days<1||data.days>30) {
+    showToast('请输入1-30天之间的时间')
+       return
+  }
+  router.push(
+    {
+    path: '/detail',
+    query: {
+      city: data.city,
+      budget: data.budget,
+      days: data.days
+    }
+  })
 }
+const hotcity = ['北京', '上海', '广州', '深圳', '成都', '杭州', '西安', '重庆']
 </script>
 
 <style scoped>
@@ -189,12 +194,12 @@ const handleSubmit = () => {
   color: #323233;
   margin-top: 8px;
 }
-
+/* 
 .city-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 12px;
-}
+} */
 
 .city-item {
   display: flex;
@@ -210,6 +215,21 @@ const handleSubmit = () => {
   align-items: center;
   justify-content: center;
 }
+
+.city-tag {
+  padding: 8px 12px;        
+  border-radius: 16px;      /* 圆角，16px 会做成胶囊形状 */
+  font-size: 14px;         
+  color: #666;             
+  background: #f7f8fa;     
+  transition: all 0.3s;     
+}
+
+.city-tag.active {
+  background: #1989fa;
+  color: #fff;
+}
+
 
 .city-name {
   font-size: 14px;

@@ -15,7 +15,7 @@
     <div class="card overview-card">
       <div class="trip-header">
         <h2>{{tripData.city}} · {{tripData.days}}天的行程</h2>
-        <span class="trip-budget">预算：{{tripData.budget}}元</span>
+        <span class="trip-budget">预算：{{tripData.totalBudget}}元</span>
       </div>
     </div>
     <van-collapse v-model="activeDays">
@@ -40,22 +40,47 @@
         </div>
       </van-collapse-item>
     </van-collapse>
+      <div class="card budget-card">
+  <div class="section-title">预算明细</div>
+  <BudgetTable :data="tripData.budgetBreakdown" :total="tripData.totalBudget" />
+</div>
+
+<div class="card tips-card">
+  <div class="section-title">温馨提示</div>
+  <ul class="tips-list">
+    <li v-for="tip in tripData.tips" :key="tip">{{ tip }}</li>
+  </ul>
+</div>
+
+<div class="card warnings-card">
+  <div class="section-title">注意事项</div>
+  <ul class="warnings-list">
+    <li v-for="warning in tripData.warnings" :key="warning">{{ warning }}</li>
+  </ul>
+</div>
 </template>
 <div v-else>
   <van-empty description="暂时没有获取到有效的旅游规划数据" />
 </div>
+      </div>
+      <div v-if="tripData && tripData.success !== false" class="detail-footer">
+  <van-button @click="goToChat" 
+  type="primary" size="large" 
+  round class="primary-button">
+  咨询 AI 助手
+  </van-button>
+</div>
 
-      
       </div>
-      </div>
-    
 </template>
 
 <script setup>
 import { onMounted, ref } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
+const router = useRouter()
 import request from '../utils/request'
 import SpotItem from '../components/SpotItem.vue'
+import BudgetTable from '../components/BudgetTable.vue'
 
 const route = useRoute()
 const loading = ref(false)
@@ -64,8 +89,11 @@ const tripData = ref(null)
 const activeDays = ref([1])
 
 const fetchRecommend = async () => {
+  
+  console.count('fetchRecommend 调用次数')
   loading.value = true
   error.value = false
+  console.log('开始请求 recommend')
   try {
     const params = {
       city: route.query.city || '北京',
@@ -74,7 +102,9 @@ const fetchRecommend = async () => {
     }
 
     const res = await request.post('/api/travel/recommend', params)
-
+if (res.success !== true) {
+  throw new Error(res.error || '请求失败')
+}
 console.log('接口原始返回：', res)
 console.log('接口返回类型：', typeof res)
 console.log('接口返回字段：', Object.keys(res || {}))
@@ -82,13 +112,21 @@ console.log('接口返回字段：', Object.keys(res || {}))
 tripData.value = res.data ?? res
 
 console.log('最终用于页面渲染的数据：', tripData.value)
+console.log('recommend 请求成功')
   } catch (err) {
+    console.log('请求失败', err)
     error.value = true
     console.error('获取推荐失败：', err)
   } finally {
     loading.value = false
   }
 }
+
+const goToChat = () => {
+ router.push({name: 'Chat'})
+}
+
+
 
 const goBack = () => {
   history.back()

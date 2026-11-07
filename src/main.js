@@ -1,7 +1,8 @@
 import { createApp } from 'vue'
 
 import { Button, Card, Tabbar, Empty, TabbarItem,NavBar,
-    NoticeBar,Loading,Field,CollapseItem, Collapse,CellGroup,Picker,Popup,Grid, GridItem,Icon} from 'vant'
+    NoticeBar,Loading,Field,CollapseItem, Collapse,CellGroup,Tag,Picker,Popup,Grid, GridItem,Icon
+} from 'vant'
 import 'vant/lib/index.css'
 import './style.css'
 import App from './App.vue'
@@ -26,6 +27,7 @@ app.use(CellGroup)
 app.use(Picker)
 app.use(Popup)
 app.use(Grid)
+app.use(Tag)
 app.use(GridItem)
 app.use(Icon)
 
